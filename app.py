@@ -17,7 +17,7 @@ import pandas as pd
 app = Flask(__name__)
 
 MODELS_DIR = "./model"
-BEST_SPAM_MODEL_FILENAME = "best_spam_model_pipeline.pkl"
+BEST_SPAM_MODEL_FILENAME = "best_spam_classifier.pkl"
 BEST_SPAM_MODEL_PATH = os.path.join(MODELS_DIR, BEST_SPAM_MODEL_FILENAME)
 DATA_FILE = "spam_data.csv"
 
