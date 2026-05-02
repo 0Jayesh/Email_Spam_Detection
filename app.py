@@ -19,12 +19,15 @@ nltk.download('punkt_tab')
 nltk.download('wordnet')
 nltk.download('omw-1.4')
 
+
 # app = Flask(__name__, 
 #             static_folder='frontend', 
 #             static_url_path='/', 
 #             template_folder='frontend')
-app = Flask(__name__, static_folder='static_web', static_url_path='/')
-
+mimetypes.add_type('application/javascript', '.js')
+mimetypes.add_type('text/css', '.css')
+# app = Flask(__name__, static_folder='static_web', static_url_path='/')
+app = Flask(__name__, static_folder='static_web', static_url_path='')
 
 CORS(app)
 
