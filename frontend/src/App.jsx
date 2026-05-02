@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Collapsible  from './Collapsible'
 
 function App() {
   const [text, setText] = useState("");
@@ -6,6 +7,12 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isHovered, setIsHovered] = useState(false);
+  const [cParam, setCParam] = useState("10.0");
+  const [penalty, setPenalty] = useState("l2");
+  const [solver, setSolver] = useState("liblinear");
+  const [training, setTraining] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [errorToast, setErrorToast] = useState(false);
 
   const styles = {
     page: {
@@ -17,11 +24,12 @@ function App() {
       padding: "24px",
       fontFamily: "Arial, sans-serif",
       boxSizing: "border-box",
+      // width: '100%'
     },
     card: {
       width: "100%",
       maxWidth: "700px",
-      background: "#fff",
+      background: "transparent",
       padding: "32px",
       borderRadius: "16px",
       boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
@@ -141,7 +149,59 @@ function App() {
       justifyContent: 'center',
       alignItems: 'center',
       gap: '4px'
+    },
+    input: {
+      minWidth: '100px',
+      borderRadius: '4px',
+    },
+    overlay: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      background: "rgba(17, 24, 39, 0.85)",
+      backdropFilter: "blur(4px)",
+      // background: "rgba(0, 0, 0, 0.6)",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 99999,
+      color: "#fff",
+      fontFamily: "Arial, sans-serif",
+    },
+    // toast: {
+    //   position: "fixed",
+    //   top: "24px",
+    //   right: "24px",
+    //   background: "#059669",
+    //   color: "#fff",
+    //   padding: "16px 24px",
+    //   borderRadius: "8px",
+    //   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+    //   zIndex: 99999,
+    //   fontWeight: "bold",
+    //   fontFamily: "Arial, sans-serif",
+    // },
+    toast: {
+      position: "fixed",
+      top: "24px",
+      right: "24px",
+      background: "#059669",
+      color: "#fff",
+      padding: "14px 28px", 
+      borderRadius: "6px",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+      zIndex: 99999,
+      fontSize: "14px",
+      fontWeight: "400",
+      fontFamily: "Arial, sans-serif",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
     }
+    
   };
 
   const handleSpamSample = () => {
@@ -206,8 +266,77 @@ function App() {
     }
   };
 
+  const handleRetrain = async () => {
+    try {
+      setTraining(true);
+      setError("");
+      setResult("");
+
+      const response = await fetch("http://127.0.0.1:5000/train", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          C: parseFloat(cParam),
+          penalty: penalty,
+          solver: solver,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Retraining failed");
+      }
+
+      setShowToast(true);
+      
+      // 2. Hide it automatically after 3.5 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3500);
+
+      console.log('data', data)
+    } catch (err) {
+      // setError(err.message);
+      setErrorToast(true);
+      setTimeout(() => {
+        setErrorToast(false);
+      }, 3500);
+    } finally {
+      setTraining(false);
+    }
+  };
+
   return (
     <div style={styles.page}>
+
+      {/* Toast Notification */}
+      {showToast && (
+              <div style={styles.toast}>
+                Model trained successfully!
+              </div>
+      )}
+
+      {errorToast && (
+        <div style={{...styles.toast, background: "#DC2626"}}>
+          Something went wrong..
+        </div>
+      )}
+
+      {/* Full-page training overlay */}
+      {training && (
+        <div style={styles.overlay}>
+          <div style={{ fontSize: "32px", fontWeight: "bold", marginBottom: "12px" }}>
+            Retraining Model...
+          </div>
+          <div style={{ fontSize: "16px", color: "#9CA3AF" }}>
+            Please wait while the algorithm updates its parameters.
+          </div>
+        </div>
+      )}
+
       <div style={styles.card}>
         <h1 style={styles.title}>Spam Detection UI</h1>
         <p style={styles.subtitle}>Enter a message and check whether it is spam.</p>
@@ -240,6 +369,69 @@ function App() {
           {"Clear"}
         </button>
         </div>
+
+        <Collapsible open={false} title="Advanced Settings">
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            
+            {/* Regularization Strength (C) */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <label style={{ fontSize: "14px", color: "#374151" }}>Regularization Strength (C):</label>
+              <input
+                type="number"
+                step="0.1"
+                value={cParam}
+                onChange={(e) => setCParam(e.target.value)}
+                style={styles.input}
+              />
+            </div>
+
+            {/* Penalty */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <label style={{ fontSize: "14px", color: "#374151" }}>Penalty:</label>
+              <select
+                value={penalty}
+                onChange={(e) => setPenalty(e.target.value)}
+                style={styles.input}
+              >
+                <option value="l1">l1</option>
+                <option value="l2">l2</option>
+              </select>
+            </div>
+
+            {/* Solver */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <label style={{ fontSize: "14px", color: "#374151" }}>Solver:</label>
+              <select
+                value={solver}
+                onChange={(e) => setSolver(e.target.value)}
+                style={styles.input}
+              >
+                <option value="newton-cg">newton-cg</option>
+                <option value="lbfgs">lbfgs</option>
+                <option value="liblinear">liblinear</option>
+                <option value="sag">sag</option>
+                <option value="saga">saga</option>
+              </select>
+            </div>
+
+            {/* Action Button */}
+            <button 
+              style={{
+                marginTop: "8px",
+                padding: "8px 16px",
+                background: "#059669",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: "500"
+              }}
+              onClick={() => handleRetrain()}
+            >
+                {training ? "Training..." : "Retrain Model"}
+            </button>
+          </div>
+        </Collapsible>
 
         {!result && <div style={styles.resultSample}>Prediction results appear here.. {result}</div> }
         {result && <div style={styles.result}>Prediction: {result}</div>}
