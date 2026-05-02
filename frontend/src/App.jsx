@@ -1,5 +1,7 @@
 import { useState } from "react";
 import Collapsible  from './Collapsible'
+import { faInfoCircle, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function App() {
   const [text, setText] = useState("");
@@ -13,6 +15,9 @@ function App() {
   const [training, setTraining] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [errorToast, setErrorToast] = useState(false);
+  const [metrics, setMetrics] = useState(null);
+  const [paramsModalOpen, setParamsModalOpen] = useState(false);
+  const [currentParams, setCurrentParams] = useState(null);
 
   const styles = {
     page: {
@@ -21,10 +26,10 @@ function App() {
       justifyContent: "center",
       alignItems: "center",
       background: "#F3F4F6",
+      // background: "#F9FAFB",
       padding: "24px",
       fontFamily: "Arial, sans-serif",
       boxSizing: "border-box",
-      // width: '100%'
     },
     card: {
       width: "100%",
@@ -290,6 +295,7 @@ function App() {
         throw new Error(data.error || "Retraining failed");
       }
 
+      setMetrics(data.evaluation_on_test_set);
       setShowToast(true);
       
       // 2. Hide it automatically after 3.5 seconds
@@ -306,6 +312,23 @@ function App() {
       }, 3500);
     } finally {
       setTraining(false);
+    }
+  };
+
+  const handleGetParams = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/get_params");
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to load parameters");
+      }
+      
+      setCurrentParams(data.last_trained_parameters);
+    } catch (err) {
+      setCurrentParams(null); // Will show no parameter state
+    } finally {
+      setParamsModalOpen(true);
     }
   };
 
@@ -337,8 +360,142 @@ function App() {
         </div>
       )}
 
+      {!training && metrics && (
+        <div style={styles.overlay}>
+          <div style={{ fontSize: "32px", fontWeight: "bold", color: "#059669" }}>
+             Training Complete!
+          </div>
+          <div style={{ fontSize: "16px", color: "#9CA3AF", marginTop: "4px" }}>
+            Performance metrics on the test dataset:
+          </div>
+
+          <div style={{
+            background: "#1F2937",
+            border: "1px solid #374151",
+            borderRadius: "12px",
+            padding: "24px",
+            marginTop: "24px",
+            width: "100%",
+            maxWidth: "550px",
+            textAlign: "left",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+            maxHeight: "350px",
+            overflowY: "auto",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #374151", fontSize: "15px" }}>
+              <span>Accuracy:</span>
+              <span style={{ color: "#34D399", fontWeight: "bold" }}>
+                {(metrics.accuracy * 100).toFixed(2)}%
+              </span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #374151", fontSize: "15px" }}>
+              <span>Precision:</span>
+              <span style={{ color: "#60A5FA" }}>{metrics.precision.toFixed(4)}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #374151", fontSize: "15px" }}>
+              <span>Recall:</span>
+              <span style={{ color: "#60A5FA" }}>{metrics.recall.toFixed(4)}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: "15px" }}>
+              <span>F1 Score:</span>
+              <span style={{ color: "#60A5FA" }}>{metrics.f1_score.toFixed(4)}</span>
+            </div>
+          </div>
+
+          <button 
+            style={{
+              marginTop: "24px",
+              padding: "10px 24px",
+              background: "#2563EB",
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }} 
+            onClick={() => setMetrics(null)}
+          >
+            Dismiss & Return
+          </button>
+        </div>
+      )}
+
+      {/* Parameters Information Overlay */}
+      {paramsModalOpen && (
+        <div style={styles.overlay}>
+          <div style={{ fontSize: "32px", fontWeight: "bold", color: "#60A5FA", marginBottom: "12px" }}>
+            Model Parameters
+          </div>
+          <div style={{ fontSize: "16px", color: "#9CA3AF", marginTop: "4px", marginBottom: "24px" }}>
+            Parameters used during the last model training run:
+          </div>
+
+          <div style={{
+            background: "#1F2937",
+            border: "1px solid #374151",
+            borderRadius: "12px",
+            padding: "24px",
+            width: "100%",
+            maxWidth: "550px",
+            textAlign: "left",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+            maxHeight: "350px",
+            overflowY: "auto",
+          }}>
+            {currentParams ? (
+              Object.entries(currentParams).map(([key, value]) => (
+                <div key={key} style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid #374151", fontSize: "15px" }}>
+                  <span style={{ color: "#E5E7EB", textTransform: "capitalize" }}>{key.replace("lr__", "")}:</span>
+                  <span style={{ color: "#34D399", fontWeight: "bold" }}>{String(value)}</span>
+                </div>
+              ))
+            ) : (
+              <div style={{ color: "#EF4444", textAlign: "center", padding: "16px" }}>
+                No model has been trained yet, or parameters not recorded.
+              </div>
+            )}
+          </div>
+
+          <button 
+            style={{
+              marginTop: "24px",
+              padding: "10px 24px",
+              background: "#2563EB",
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }} 
+            onClick={() => setParamsModalOpen(false)}
+          >
+            Close
+          </button>
+        </div>
+      )}
+
       <div style={styles.card}>
-        <h1 style={styles.title}>Spam Detection UI</h1>
+        {/* <h1 style={styles.title}>Spam Detection UI</h1> */}
+        <div style={{ position: "relative", marginBottom: "16px", textAlign: "center" }}>
+          <h1 style={styles.title}>Spam Detection</h1>
+          <button 
+            style={{
+              position: "absolute",
+              right: "24px",
+              top: "8px",
+              background: "none",
+              border: "none",
+              // color: "#2563EB",
+              color: "#4B5563",
+              cursor: "pointer",
+              fontSize: "20px"
+            }}
+            onClick={handleGetParams}
+            title="View Current Parameters"
+          >
+            <FontAwesomeIcon icon={faInfoCircle} />
+          </button>
+        </div>
         <p style={styles.subtitle}>Enter a message and check whether it is spam.</p>
 
         <textarea
@@ -434,7 +591,16 @@ function App() {
         </Collapsible>
 
         {!result && <div style={styles.resultSample}>Prediction results appear here.. {result}</div> }
-        {result && <div style={styles.result}>Prediction: {result}</div>}
+        {/* {result && <div style={styles.result}>Prediction: {result}</div>} */}
+        {result && (
+          <div style={{
+            ...styles.result,
+            background: result === "spam" ? "#fee2e2" : "#e8f5e9",
+            color: result === "spam" ? "#b71c1c" : "#1b5e20",
+          }}>
+            Prediction: {result}
+          </div>
+        )}
         {error && <div style={styles.error}>{error}</div>}
       </div>
     </div>
