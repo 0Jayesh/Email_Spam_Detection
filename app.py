@@ -1,12 +1,11 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import joblib
 import os
 import re
-
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -15,6 +14,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import pandas as pd
 
 app = Flask(__name__)
+CORS(app)
 
 MODELS_DIR = "./model"
 BEST_SPAM_MODEL_FILENAME = "best_spam_classifier.pkl"
