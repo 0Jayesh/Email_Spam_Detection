@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import joblib
 import os
@@ -13,6 +13,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import pandas as pd
 import nltk
+import mimetypes
 nltk.download('stopwords')
 nltk.download('punkt')
 nltk.download('punkt_tab')
@@ -63,10 +64,10 @@ def load_model():
 
 load_model()
 
-# 1. Serves website (HTML/JS/CSS)
-@app.route('/')
-def home():
-    return app.send_static_file('index.html')
+# # 1. Serves website (HTML/JS/CSS)
+# @app.route('/')
+# def home():
+#     return app.send_static_file('index.html')
 
 @app.route('/api/info', methods=['GET'])
 def api_info():
@@ -195,6 +196,15 @@ def evaluate_text():
 #     nltk.download('stopwords', quiet=True)
 #     nltk.download('wordnet', quiet=True)
 #     app.run(host="0.0.0.0", debug=True)
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    # This check ensures that your API routes (/evaluate, /train) 
+    # still work even with a catch-all route.
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    return app.send_static_file('index.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
