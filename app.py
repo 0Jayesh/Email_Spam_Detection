@@ -19,7 +19,11 @@ nltk.download('punkt_tab')
 nltk.download('wordnet')
 nltk.download('omw-1.4')
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            static_folder='frontend', 
+            static_url_path='/', 
+            template_folder='frontend')
+
 CORS(app)
 
 MODELS_DIR = "./model"
@@ -54,8 +58,13 @@ def load_model():
 
 load_model()
 
-@app.route('/', methods=['GET'])
+# 1. Serves website (HTML/JS/CSS)
+@app.route('/')
 def home():
+    return app.send_static_file('index.html')
+
+@app.route('/api/info', methods=['GET'])
+def api_info():
     return jsonify({
         "message": "Welcome to the Spam Classifier API",
         "available_endpoints": {

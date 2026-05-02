@@ -3,6 +3,9 @@ import Collapsible  from './Collapsible'
 import { faInfoCircle, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+const BASE_URL = window.location.origin; 
+
+
 function App() {
   const [text, setText] = useState("");
   const [result, setResult] = useState("");
@@ -249,7 +252,7 @@ function App() {
       setError("");
       setResult("");
 
-      const response = await fetch("http://127.0.0.1:5000/evaluate", {
+      const response = await fetch(`${BASE_URL}/evaluate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -277,7 +280,7 @@ function App() {
       setError("");
       setResult("");
 
-      const response = await fetch("http://127.0.0.1:5000/train", {
+      const response = await fetch(`${BASE_URL}/train`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -317,7 +320,7 @@ function App() {
 
   const handleGetParams = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:5000/get_params");
+      const response = await fetch(`${BASE_URL}/get_params`);
       const data = await response.json();
       
       if (!response.ok) {
