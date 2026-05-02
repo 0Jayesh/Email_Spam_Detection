@@ -12,6 +12,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import pandas as pd
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
 
 app = Flask(__name__)
 CORS(app)
@@ -171,7 +177,11 @@ def evaluate_text():
 
     return jsonify({"input_text": text_input, "prediction": result}), 200
 
+# if __name__ == '__main__':
+#     nltk.download('stopwords', quiet=True)
+#     nltk.download('wordnet', quiet=True)
+#     app.run(host="0.0.0.0", debug=True)
+
 if __name__ == '__main__':
-    nltk.download('stopwords', quiet=True)
-    nltk.download('wordnet', quiet=True)
-    app.run(host="0.0.0.0", debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
