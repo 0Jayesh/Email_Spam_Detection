@@ -286,14 +286,19 @@ function App() {
   const handlePredict = async () => {
 
     if (!isInitialized) {
+      // Update: Trigger error toast instead of just setting state
       setError("Please initialize the model before making predictions.");
       setResult("");
+      setErrorToast(true);
+      setTimeout(() => setErrorToast(false), 3500);
       return;
     }
 
     if (!text.trim()) {
       setError("Please enter email or message text.");
       setResult("");
+      setErrorToast(true);
+      setTimeout(() => setErrorToast(false), 3500);
       return;
     }
 
@@ -319,6 +324,8 @@ function App() {
       setResult(data.prediction);
     } catch (err) {
       setError(err.message);
+      setErrorToast(true);
+      setTimeout(() => setErrorToast(false), 3500);
     } finally {
       setLoading(false);
     }
@@ -412,7 +419,7 @@ function App() {
       
       setCurrentParams(data.last_trained_parameters);
     } catch (err) {
-      setCurrentParams(null); // Will show no parameter state
+      setCurrentParams(null);
     } finally {
       setParamsModalOpen(true);
     }
@@ -430,7 +437,7 @@ function App() {
 
       {errorToast && (
         <div style={{...styles.toast, background: "#DC2626"}}>
-          Something went wrong..
+          {!isInitialized ? 'Please initialize the model before making predictions.': 'Something went wrong..' }
         </div>
       )}
 
