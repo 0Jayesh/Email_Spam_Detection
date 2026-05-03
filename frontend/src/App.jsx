@@ -286,7 +286,8 @@ function App() {
   const handlePredict = async () => {
 
     if (!isInitialized) {
-      // Update: Trigger error toast instead of just setting state
+      setInitLoading(true); // Keeps button loading state
+      setTraining(true);
       setError("Please initialize the model before making predictions.");
       setResult("");
       setErrorToast(true);
@@ -328,6 +329,8 @@ function App() {
       setTimeout(() => setErrorToast(false), 3500);
     } finally {
       setLoading(false);
+      setInitLoading(false);
+      setTraining(false);
     }
   };
 
@@ -445,7 +448,7 @@ function App() {
       {training && (
         <div style={styles.overlay}>
           <div style={{ fontSize: "32px", fontWeight: "bold", marginBottom: "12px" }}>
-            Retraining Model...
+             { initLoading ? 'Training Model..' :  'Retraining Model...' }
           </div>
           <div style={{ fontSize: "16px", color: "#9CA3AF" }}>
             Please wait while the algorithm updates its parameters.
