@@ -18,6 +18,7 @@ function App() {
   const [training, setTraining] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [errorToast, setErrorToast] = useState(false);
+  const [errorToastMessage, setErrorToastMessage] = useState('');
   const [metrics, setMetrics] = useState(null);
   const [paramsModalOpen, setParamsModalOpen] = useState(false);
   const [currentParams, setCurrentParams] = useState(null);
@@ -291,6 +292,7 @@ function App() {
       setError("Please initialize the model before making predictions.");
       setResult("");
       setErrorToast(true);
+      setErrorToastMessage('Please initialize the model before making predictions.');
       setTimeout(() => setErrorToast(false), 3500);
       return;
     }
@@ -299,6 +301,7 @@ function App() {
       setError("Please enter email or message text.");
       setResult("");
       setErrorToast(true);
+      setErrorToastMessage('Please enter email or message text.')
       setTimeout(() => setErrorToast(false), 3500);
       return;
     }
@@ -326,6 +329,7 @@ function App() {
     } catch (err) {
       setError(err.message);
       setErrorToast(true);
+      setErrorToastMessage('Something went wrong..');
       setTimeout(() => setErrorToast(false), 3500);
     } finally {
       setLoading(false);
@@ -370,6 +374,7 @@ function App() {
     } catch (err) {
       // setError(err.message);
       setErrorToast(true);
+      setErrorToastMessage('Something went wrong..');
       setTimeout(() => {
         setErrorToast(false);
       }, 3500);
@@ -406,6 +411,7 @@ function App() {
       setMetrics(data.evaluation_on_test_set || data.evaluation_on_test_set);
     } catch (err) {
       setErrorToast(true);
+      setErrorToastMessage('Something went wrong..');
       setTimeout(() => setErrorToast(false), 3500);
     } finally {
       setInitLoading(false);
@@ -442,7 +448,7 @@ function App() {
 
       {errorToast && (
         <div style={{...styles.toast, background: "#DC2626"}}>
-          {!isInitialized ? 'Please initialize the model before making predictions.': 'Something went wrong..' }
+          {errorToastMessage}
         </div>
       )}
 
@@ -453,7 +459,8 @@ function App() {
              { initLoading ? 'Training Model..' :  'Retraining Model...' }
           </div>
           <div style={{ fontSize: "16px", color: "#9CA3AF" }}>
-            Please wait while the algorithm updates its parameters.
+            { initLoading ? 'Please wait while we train the algorithm' :  'Please wait while the algorithm updates its parameters' }
+            
           </div>
         </div>
       )}
