@@ -584,7 +584,7 @@ function App() {
         </div>
         
 
-        <p style={styles.subtitle}>Enter a message and check whether it is spam.</p>
+        <p style={styles.subtitle}> message and check whether it is spam.</p>
 
         {/* Initialize Model Button */}
         <button
