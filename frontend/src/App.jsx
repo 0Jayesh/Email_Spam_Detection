@@ -646,7 +646,7 @@ function App() {
         <Collapsible open={false} title="Advanced Settings">
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             
-            {/* Regularization Strength (C) */}
+          {/* Regularization Strength (C) */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <label style={{ fontSize: "14px", color: "#374151" }}>Regularization Strength (C):</label>
               <input
@@ -658,6 +658,26 @@ function App() {
               />
             </div>
 
+            {/* Solver */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <label style={{ fontSize: "14px", color: "#374151" }}>Solver:</label>
+              <select
+                value={solver}
+                onChange={(e) => {
+                  setSolver(e.target.value);
+                  // Reset penalty when solver changes to prevent invalid states
+                  setPenalty('l2'); 
+                }}
+                style={styles.input}
+              >
+                <option value="newton-cg">newton-cg</option>
+                <option value="lbfgs">lbfgs</option>
+                <option value="liblinear">liblinear</option>
+                <option value="sag">sag</option>
+                <option value="saga">saga</option>
+              </select>
+            </div>
+
             {/* Penalty */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <label style={{ fontSize: "14px", color: "#374151" }}>Penalty:</label>
@@ -666,24 +686,13 @@ function App() {
                 onChange={(e) => setPenalty(e.target.value)}
                 style={styles.input}
               >
-                <option value="l1">l1</option>
+                {(solver === 'liblinear' || solver === 'saga') && (
+                  <option value="l1">l1</option>
+                )}
                 <option value="l2">l2</option>
-              </select>
-            </div>
-
-            {/* Solver */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <label style={{ fontSize: "14px", color: "#374151" }}>Solver:</label>
-              <select
-                value={solver}
-                onChange={(e) => setSolver(e.target.value)}
-                style={styles.input}
-              >
-                <option value="newton-cg">newton-cg</option>
-                <option value="lbfgs">lbfgs</option>
-                <option value="liblinear">liblinear</option>
-                <option value="sag">sag</option>
-                <option value="saga">saga</option>
+                {(solver === 'saga') && (
+                  <option value="None">None</option>
+                )}
               </select>
             </div>
 
