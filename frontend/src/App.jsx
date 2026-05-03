@@ -21,6 +21,8 @@ function App() {
   const [metrics, setMetrics] = useState(null);
   const [paramsModalOpen, setParamsModalOpen] = useState(false);
   const [currentParams, setCurrentParams] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [initLoading, setInitLoading] = useState(false);
 
   const styles = {
     page: {
@@ -121,6 +123,47 @@ function App() {
       borderRadius: "10px",
       cursor: "pointer",
       fontSize: "12px",
+    },
+    initButton: {
+      width: "calc(90% + 30px)", 
+      padding: "12px",
+      marginBottom: "16px",
+      // background: isInitialized ? "#10B981" : "#3B82F6",
+      background: isInitialized ? "#10B981" : "#60A5FA",
+      color: "#fff",
+      border: "none",
+      borderRadius: "8px",
+      cursor: "pointer",
+      fontSize: "15px",
+      fontWeight: "bold",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      transition: "background 0.2s ease",
+    },
+    // initButton: {
+    //   width: "calc(90% + 30px)", 
+    //   padding: "12px 32px", // Updated to match the Predict button's horizontal padding
+    //   marginBottom: "16px",
+    //   background: isInitialized ? "#059669" : "#2563EB", // Matches Predict button blue, and green when active
+    //   color: "#fff",
+    //   border: "none",
+    //   borderRadius: "8px", // Matches Predict button border-radius
+    //   cursor: "pointer",
+    //   fontSize: "16px", // Matches Predict button font size
+    //   fontWeight: "normal", // Matches Predict button weight
+    //   boxShadow: "none", // Remove extra shadow for a flatter, matching look
+    //   transition: "background 0.2s ease",
+    // },
+    initButtonDisabled: {
+      width: "calc(90% + 30px)", 
+      padding: "12px",
+      marginBottom: "16px",
+      background: "#9CA3AF",
+      color: "#fff",
+      border: "none",
+      borderRadius: "8px",
+      cursor: "not-allowed",
+      fontSize: "15px",
+      fontWeight: "bold",
     },
     result: {
       marginTop: "16px",
@@ -241,6 +284,13 @@ function App() {
   }
 
   const handlePredict = async () => {
+
+    if (!isInitialized) {
+      setError("Please initialize the model before making predictions.");
+      setResult("");
+      return;
+    }
+
     if (!text.trim()) {
       setError("Please enter email or message text.");
       setResult("");
@@ -315,6 +365,39 @@ function App() {
       }, 3500);
     } finally {
       setTraining(false);
+    }
+  };
+
+  const handleInitialTraining = async () => {
+    try {
+      setInitLoading(true);
+      setError("");
+      
+      const response = await fetch(`${BASE_URL}/train`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          C: parseFloat(cParam),
+          penalty: penalty,
+          solver: solver,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Initialization failed");
+      }
+
+      setIsInitialized(true);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3500);
+      setMetrics(data.evaluation_on_test_set || data.evaluation_on_test_set);
+    } catch (err) {
+      setErrorToast(true);
+      setTimeout(() => setErrorToast(false), 3500);
+    } finally {
+      setInitLoading(false);
     }
   };
 
@@ -500,7 +583,14 @@ function App() {
           </button>
         </div>
         <p style={styles.subtitle}>Enter a message and check whether it is spam.</p>
-
+        <button
+            // style={isInitialized ? styles.initButton : styles.initButton}
+            style={isInitialized ? styles.initButton : {...styles.initButton, animation: "pulse 1.5s infinite"}}
+            onClick={handleInitialTraining}
+            disabled={initLoading || isInitialized}
+           >
+              {initLoading ? "Training in progress..." : isInitialized ? "✔️ Model Initialized" : "Initialize Model"}
+        </button>
         <textarea
           style={styles.textarea}
           rows="10"
