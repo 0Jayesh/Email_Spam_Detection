@@ -582,15 +582,19 @@ function App() {
             <FontAwesomeIcon icon={faInfoCircle} />
           </button>
         </div>
+        
+
         <p style={styles.subtitle}>Enter a message and check whether it is spam.</p>
+
+        {/* Initialize Model Button */}
         <button
-            // style={isInitialized ? styles.initButton : styles.initButton}
-            style={isInitialized ? styles.initButton : {...styles.initButton, animation: "pulse 1.5s infinite"}}
-            onClick={handleInitialTraining}
-            disabled={initLoading || isInitialized}
-           >
-              {initLoading ? "Training in progress..." : isInitialized ? "✔️ Model Initialized" : "Initialize Model"}
+          style={isInitialized ? styles.initButton : {...styles.initButton, animation: "pulse 1.5s infinite"}}
+          onClick={handleInitialTraining}
+          disabled={initLoading || isInitialized}
+        >
+          {initLoading ? "Training in progress..." : isInitialized ? "✔️ Model Initialized" : "Initialize Model"}
         </button>
+
         <textarea
           style={styles.textarea}
           rows="10"
