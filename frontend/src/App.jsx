@@ -380,6 +380,7 @@ function App() {
 
   const handleInitialTraining = async () => {
     try {
+      setTraining(true)
       setInitLoading(true);
       setError("");
       
@@ -408,6 +409,7 @@ function App() {
       setTimeout(() => setErrorToast(false), 3500);
     } finally {
       setInitLoading(false);
+      setTraining(false);
     }
   };
 
@@ -602,7 +604,7 @@ function App() {
           onClick={handleInitialTraining}
           disabled={initLoading || isInitialized}
         >
-          {initLoading ? "Training in progress..." : isInitialized ? "✔️ Model Initialized" : "Initialize Model"}
+          {initLoading ? "Training in progress..." : isInitialized ? " Model Initialized" : "Initialize Model"}
         </button>
 
         <textarea
