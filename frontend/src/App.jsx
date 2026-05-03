@@ -286,8 +286,8 @@ function App() {
   const handlePredict = async () => {
 
     if (!isInitialized) {
-      setInitLoading(true); // Keeps button loading state
-      setTraining(true);
+      // setInitLoading(true); // Keeps button loading state
+      // setTraining(true);
       setError("Please initialize the model before making predictions.");
       setResult("");
       setErrorToast(true);
