@@ -1,12 +1,12 @@
 # Interactive MLOps Email Spam Classifier
 
-An end-to-end MLOps project for email spam classification — covering model training, hyperparameter tuning, experiment tracking, and a full-stack deployment with a live, interactive dashboard for remote model reconfiguration.
+An end-to-end MLOps project for email spam classification - covering model training, hyperparameter tuning, experiment tracking, and a full-stack deployment with a live, interactive dashboard for remote model reconfiguration.
 
 **Live Demo:** [Render Deployment](https://email-spam-detection-1-mqjm.onrender.com/)
 
 ## What it does
 
-Classifies emails as spam or not spam using a Logistic Regression model trained on TF-IDF features with N-gram support. Beyond the model itself, this project demonstrates a full MLOps loop — experiment tracking, hyperparameter tuning, model serialization, and a React dashboard that lets you reconfigure and retrain the model live, without touching code.
+Classifies emails as spam or not spam using a Logistic Regression model trained on TF-IDF features with N-gram support. Beyond the model itself, this project demonstrates a full MLOps loop - experiment tracking, hyperparameter tuning, model serialization, and a React dashboard that lets you reconfigure and retrain the model live, without touching code.
 
 ## Architecture
 
@@ -28,20 +28,20 @@ Docker container → Deployed on Render
 
 ## Tech Stack
 
-- **scikit-learn** — Logistic Regression, TF-IDF vectorization, N-grams
-- **GridSearchCV** — hyperparameter optimization
-- **MLflow** — experiment tracking and metrics logging
-- **Joblib** — model serialization
-- **Flask** — REST API backend
-- **React (Vite)** — interactive frontend dashboard
-- **Docker** — containerized deployment
-- **Render** — hosting
+- **scikit-learn** - Logistic Regression, TF-IDF vectorization, N-grams
+- **GridSearchCV** - hyperparameter optimization
+- **MLflow** - experiment tracking and metrics logging
+- **Joblib** - model serialization
+- **Flask** - REST API backend
+- **React (Vite)** - interactive frontend dashboard
+- **Docker** - containerized deployment
+- **Render** - hosting
 
 ## Key Features
 
 - **Model Engineering:** Logistic Regression classifier trained on TF-IDF features. A baseline model (unigrams, fixed parameters) achieves 96.99% accuracy; a GridSearchCV-tuned model (5-fold cross-validation, unigrams + bigrams, tuned feature count and regularization strength) improves this to **98.13% accuracy**, with experiments tracked in MLflow.
-- **MLOps Integration:** Flask REST API with three endpoints — `/train` (retrain with custom hyperparameters), `/get_params` (retrieve last-used parameters), and `/evaluate` (classify new text). Includes validation logic to reject scikit-learn-incompatible solver/penalty combinations before training. Models are serialized with Joblib for persistence.
-- **Interactive ML Dashboard:** React (Vite) interface that lets users remotely reconfigure hyperparameters (C, Solver, Penalty) via the `/train` endpoint and trigger re-training sessions with immediate performance feedback — no code changes required.
+- **MLOps Integration:** Flask REST API with three endpoints - `/train` (retrain with custom hyperparameters), `/get_params` (retrieve last-used parameters), and `/evaluate` (classify new text). Includes validation logic to reject scikit-learn-incompatible solver/penalty combinations before training. Models are serialized with Joblib for persistence.
+- **Interactive ML Dashboard:** React (Vite) interface that lets users remotely reconfigure hyperparameters (C, Solver, Penalty) via the `/train` endpoint and trigger re-training sessions with immediate performance feedback - no code changes required.
 - **Production Deployment:** Fully containerized with Docker for consistent dependency management, deployed on Render.
 
 ## Run Locally
